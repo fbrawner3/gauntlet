@@ -43,7 +43,7 @@ SEVERITY AND STOPPING RULE (mandatory)
 
 const common = (proposal: string, priorRemediation?: string) => `
 You are reviewing the following proposal through Gauntlet. If it identifies a
-Trilium source folder, read that folder and all child notes recursively before
+source folder, read that folder and all child notes recursively before
 reviewing it. If it is a local path, read that path from the supplied project
 directory.
 Return the review as markdown in your final response. Do not create or modify
@@ -52,7 +52,7 @@ any files; the Gauntlet finalizer agent writes the output files.
 Gauntlet is an adversarial review, not a redesign exercise. Do not silently
 invent missing facts. Treat material omissions as findings.
 Use only the proposal and files present in the supplied project directory or
-the supplied Trilium source folder.
+the supplied source folder.
 Do not use external repository services or repository/search integrations.
 Local filesystem access to the supplied project directory is allowed. If
 local evidence is missing, record that as a finding instead of looking it up
@@ -216,20 +216,15 @@ FINAL REPLY: markdown change log only, with these sections:
 ## New issues   (anything you noticed; empty if none)`;
 }
 
-// Decided 2026-08-31: "vector" mode (default, renamed from "trilium"
-// 2026-09-21 -- Felton's call: Gauntlet moves off Trilium onto vector memory,
-// matching TT's tripleThreatPrompts.ts pattern) has the specialist file its
-// own reports via mcp__geekygramps__write_memory, one call per report, same
-// note_id every time so a re-run updates rather than duplicates. The
-// consolidated GAUNTLET-REVIEW note uses doc_type "gauntlet_consolidated_verdict",
-// the one Gauntlet doc_type the vector store auto-flags to_obsidian=true for
-// (db/migrations/202609070001_vector_memory.sql), which the workstation
-// poller (trilium-vector-mirror/scripts/obsidian-export.mjs) then exports to
-// the FeltonsVault Runbooks tree -- see that script for the exact path shape.
-// "export" mode is unchanged and is for Gauntlet runs on friends' projects:
-// the specialist instead writes plain markdown files to a local folder and
-// zips them, with zero vector/Trilium involvement, so nothing about someone
-// else's project ever touches this homelab's own knowledge base.
+// "vector" mode (default) has the specialist file its own reports via
+// mcp__geekygramps__write_memory, one call per report, same note_id every time
+// so a re-run updates rather than duplicates. The consolidated GAUNTLET-REVIEW
+// note uses doc_type "gauntlet_consolidated_verdict", the one Gauntlet doc_type
+// the vector store flags for export to the operator's notes vault.
+// "export" mode is for Gauntlet runs on other people's projects: the specialist
+// instead writes plain markdown files to a local folder and zips them, with no
+// vector memory involvement, so nothing about someone else's project ever
+// touches this homelab's own knowledge base.
 export function buildGauntletFinalizerPrompt(params: {
   proposalName: string;
   workflowId: string;
@@ -244,9 +239,9 @@ export function buildGauntletFinalizerPrompt(params: {
   const body = `VERDICT: ${params.verdict}\n\nCLAUDE REVIEW:\n${params.claudeReview}\n\nCODEX REVIEW:\n${params.codexReview}\n\nANTIGRAVITY REVIEW:\n${params.antigravityReview}\n\nCHALLENGE:\n${params.challenge}`;
 
   if (params.outputMode === "export") {
-    return `You are the Gauntlet finalizer, running in EXPORT mode -- this proposal is not FNDHome's own, do not touch vector memory, Trilium, or any Trilium tool at all.
+    return `You are the Gauntlet finalizer, running in EXPORT mode -- this proposal is not FNDHome's own, do not touch vector memory or any memory tool at all.
 
-Create a local folder named "${params.proposalName}" inside a subfolder called gauntlet-exports under the current working directory. Inside it, write six plain markdown files named GAUNTLET-REVIEW.md, verdict.md, claude-review.md, codex-review.md, antigravity-review.md, and cross-agent-challenge.md, using the exact content below (verdict.md contains only the VERDICT line). Then zip that folder into "${params.proposalName}.zip" in the same gauntlet-exports directory. Do not use vector memory, Trilium, any Trilium tool, or any external repository or service.
+Create a local folder named "${params.proposalName}" inside a subfolder called gauntlet-exports under the current working directory. Inside it, write six plain markdown files named GAUNTLET-REVIEW.md, verdict.md, claude-review.md, codex-review.md, antigravity-review.md, and cross-agent-challenge.md, using the exact content below (verdict.md contains only the VERDICT line). Then zip that folder into "${params.proposalName}.zip" in the same gauntlet-exports directory. Do not use vector memory, any memory tool, or any external repository or service.
 
 ${body}
 
@@ -268,7 +263,7 @@ After writing and zipping the files, return the consolidated GAUNTLET-REVIEW con
     .map((r) => `- note_id="${r.id}", title="${r.title}", project="${params.projectSlug}", doc_type="${r.docType}", ancestry=${ancestry}, content = ${r.desc}`)
     .join("\n");
 
-  return `You are the Gauntlet finalizer. Do not use Trilium, any Trilium tool, or any external repository or service.
+  return `You are the Gauntlet finalizer. Do not use any external repository or service.
 
 File each of the following as its own call to mcp__geekygramps__write_memory. Reuse the exact note_id given so a re-run updates the note instead of duplicating it:
 ${callList}

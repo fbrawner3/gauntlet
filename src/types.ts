@@ -27,14 +27,11 @@ export const GAUNTLET_CATEGORIES = [
 ] as const;
 export type GauntletCategory = (typeof GAUNTLET_CATEGORIES)[number];
 
-// Decided 2026-08-31, output backend changed 2026-09-21 (Felton's call:
-// Gauntlet moves off Trilium onto vector memory, matching TT): Gauntlet is
-// also used on friends' projects, not just FNDHome's own -- "vector"
-// (default) has the finalizer file its reports via mcp__geekygramps__write_memory
-// (the consolidated report under doc_type "gauntlet_consolidated_verdict",
-// which the vector store auto-flags to_obsidian=true for -- see
-// obsidian-export.mjs), "export" instead has the finalizer write plain
-// markdown files to a local folder and zip them, with zero vector/Trilium
+// Gauntlet is also used on other people's projects, not just this homelab's
+// own -- "vector" (default) has the finalizer file its reports via
+// mcp__geekygramps__write_memory (the consolidated report under doc_type
+// "gauntlet_consolidated_verdict"), "export" instead has the finalizer write
+// plain markdown files to a local folder and zip them, with no vector memory
 // involvement, safe to hand off outside this homelab.
 export const GAUNTLET_OUTPUT_MODES = ["vector", "export"] as const;
 export type GauntletOutputMode = (typeof GAUNTLET_OUTPUT_MODES)[number];
