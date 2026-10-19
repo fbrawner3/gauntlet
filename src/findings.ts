@@ -18,7 +18,10 @@ export interface ParsedFinding {
   evidence: string;
   recommendation: string;
   verification: string;
-  disposition: "validated" | "disputed" | null;
+  // "resolved" is only used on a follow-up round: the prior round's finding,
+  // by the same F#, that the current files now fix. It never counts toward
+  // the verdict (which counts "validated" only).
+  disposition: "validated" | "disputed" | "resolved" | null;
 }
 
 const baseFindingSchema = z.object({
@@ -35,7 +38,10 @@ const baseFindingSchema = z.object({
 
 const challengeFindingSchema = baseFindingSchema.extend({
   reviewer: z.enum(GAUNTLET_REVIEWERS),
-  disposition: z.enum(["validated", "disputed"])
+  // A finding the challenge lists in its JSON array is validated unless it
+  // says otherwise. Run 12 returned 41 findings with no disposition key; the
+  // parser required one, dropped all 41, and zero findings read as PASSED.
+  disposition: z.enum(["validated", "disputed", "resolved"]).default("validated")
 });
 
 function extractJsonArray(content: string): unknown[] | null {
@@ -71,6 +77,12 @@ export function parseIndependentFindings(reviewer: GauntletReviewer, content: st
     });
   }
   return findings;
+}
+
+// How many entries the challenge's JSON array held, whether or not they parsed.
+// Lets the workflow tell "no findings" apart from "findings the parser dropped".
+export function countRawJsonFindings(content: string): number {
+  return extractJsonArray(content)?.length ?? 0;
 }
 
 export function parseChallengeFindings(content: string): ParsedFinding[] {
