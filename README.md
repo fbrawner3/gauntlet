@@ -1,4 +1,5 @@
 # Gauntlet
+![Gauntlet](docs/images/gauntlet-logo.jpg)
 
 Gauntlet is an adversarial, multi-agent review workflow for proposal and project material. It runs inside `geekygramps-mcp` as a [DBOS](https://docs.dbos.dev/) durable workflow and uses the shared agent-runner service to invoke three independent reviewers. Runs are launched, tracked, remediated, revised, and closed from [The Arena](https://github.com/fbrawner3/the-arena).
 
