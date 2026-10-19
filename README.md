@@ -50,6 +50,10 @@ A run's `outputMode` controls where the finalizer writes its reports:
 - `vector` (default): reports are filed to the shared vector memory store.
 - `export`: reports are written as plain Markdown files to a local folder and zipped, with no vector-memory involvement, so a run on someone else's project can be handed off cleanly.
 
+## Knowledge and memory
+
+Shared [vector memory](https://github.com/fbrawner3/vector-memory) is the source of truth for agent knowledge: PostgreSQL with hybrid retrieval (dense vector search plus full-text search, fused and reranked), reached through the MCP `search_memory` and `write_memory` tools. The Trilium note store it replaced is no longer the system of record. In `vector` mode the finalizer files the consolidated report, verdict, reviewer reports, and challenge output there, and saved remediations are filed there too.
+
 ## HTTP API
 
 The MCP service exposes these routes:
